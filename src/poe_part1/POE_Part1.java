@@ -1,6 +1,8 @@
 package poe_part1;
 
 import javax.swing.JOptionPane;
+import org.json.JSONObject;
+import org.json.JSONArray;
 
 public class POE_Part1 {
 
@@ -82,7 +84,120 @@ public class POE_Part1 {
                 JOptionPane.showMessageDialog(null, "Maximum login attempts exceeded. Access denied.");
                 System.exit(0);
             }
-        }
-    }
 
+            boolean QuickChat = true;
+            int numMessages = 0;        // Number of messages user wants to send
+            int messagesSent = 0;        // Counter for messages sent by the user
+            JSONArray storedMessages = new JSONArray();      //Store messages for later use
+
+            //Display the Quick Chat
+            while (QuickChat) {
+                String input = JOptionPane.showInputDialog(null, "Welcome to QuickChat:\n" + "1) Send Messages\n2) Show stored messages (coming soon)\n3) Quit", "Please select one of the above options");     //Promp user for their choice
+
+                if (input == null) {
+                    QuickChat = false;
+                    continue;
+                } else if (input.equals("3")) {
+                    JOptionPane.showMessageDialog(null, "GoodBye!");      //Exit program if user chooses option 3
+                    break;
+                } else if (input.equals("2")) {
+                    JOptionPane.showMessageDialog(null, "Coming soon");  //Store messages is not yet implemented
+                    continue;
+                } else if (input.equals("1")) {
+                    numMessages = Integer.parseInt(JOptionPane.showInputDialog(null, "How many messages would you like to send?")); //Prompt user for the amount of messages they would like to send
+                }
+
+                //for loop for option 1 which is dependent on the amount of messages the user wants to send
+                for (int i = 0; i < numMessages && messagesSent < numMessages; i++) {
+
+                    String recipient = JOptionPane.showInputDialog(null, "Enter recipient cellphone number (+27 followed by max 10 digits):");   // Prompt user to enter the recipients cellphone number and check if number is valid
+                    if (recipient == null || !recipient.matches(numberPattern)) {
+                        JOptionPane.showMessageDialog(null, "Cell phone number is incorrectly formatted or does not contain international code.");
+                        continue;
+                    }
+
+                    String message = JOptionPane.showInputDialog(null, "Enter message (max 250 characters):");   // Prompt user to enter the message
+                    if (message == null) {
+                        continue;
+                    }
+                    if (message.length() > 250) {                                                                                                               //Make sure the message fits the criteria
+                        JOptionPane.showMessageDialog(null, "Message exceeds 250 characters! Please try again. ");
+                        break;
+                    }
+
+                    //Setting up the message data
+                    String messageID = String.valueOf((int) (Math.random() * 1000000000)); // Random 10-digit number
+                    messagesSent++; // Count the number of sent messages
+                    String str = message.trim();
+                    int pos1 = str.indexOf(" ");
+                    int pos2 = str.lastIndexOf(" ");
+                    String firstWord = str.substring(0, pos1);
+                    String lastWord = str.substring(pos2 + 1);
+
+                    // Build the message hash using StringBuilder
+                    StringBuilder messageHashBuilder = new StringBuilder();
+                    messageHashBuilder.append(messageID.substring(0, 2)).append(":").append(messagesSent).append(":").append(firstWord).append(lastWord);
+                    String messageHash = messageHashBuilder.toString().toUpperCase();
+
+                    // Display the send options to the user
+                    String option = JOptionPane.showInputDialog(null, "Message completed. Choose an option:\n1) Send Message\n2) Disregard Message\n3) Store Message for later");
+                    if (option != null) {
+                        switch (option) {
+                            case "1":
+                                JOptionPane.showMessageDialog(null, "Message successfully sent."); // Send message
+                                break;
+                            case "2":
+                                JOptionPane.showMessageDialog(null, "Deleted succesfully.");  // Disregard message
+                                messagesSent--; // Removes message from memory if disregarded
+                                break;
+                            case "3":
+                                JSONObject messageObj = new JSONObject();  // Store message as JSON object
+                                messageObj.put("messageID", messageID);
+                                messageObj.put("messageHash", messageHash);
+                                messageObj.put("recipient", recipient);
+                                messageObj.put("message", message);
+                                storedMessages.put(messageObj);
+                                JOptionPane.showMessageDialog(null, "Message successfully stored.");
+                                break;
+                            default:
+                                JOptionPane.showMessageDialog(null, "Invalid option.");  //Default option if invalid option is chosen
+                        }
+                    }
+
+                    // Display Message Summary
+                    JOptionPane.showMessageDialog(null, "Message ID: " + messageID + "\nMessage Hash: " + messageHash + "\nRecipient: " + recipient + "\nMessage: " + message);
+
+                }
+
+            }
+            JOptionPane.showMessageDialog(null, "Total messages sent is: " + messagesSent);
+        }
+
+    }
 }
+
+
+/*
+The regex patterns for password complexity, username pattern and cellphone number formatting were adapted with the assistance of ChatGPT (OpenAI, 2025) -
+
+Reference: OpenAI, 2025. ChatGPT (GPT-4, April 2025 version) - [online]
+ Available at:  https://chat.openai.com
+
+Accessed 20 April 2025
+ */
+
+ /*Reference:
+The method used for selecting the first and last words of the message was implemented with guidance from the following tutorial:
+ Input a string and print its first and last word | string in java
+Author: Genuine Coder
+ URL: https://youtu.be/BDlxw2ojPBI?si=hoShxgd3Z75pC5k9
+ Accessed: [23 May 2025]
+ */
+ /*
+The JSON method used for storing the messages were adapted with the assistance of ChatGPT (OpenAI, 2025) -
+
+Reference: OpenAI, 2025. ChatGPT (GPT-4, May 2025 version) - [online]
+ Available at:  https://chat.openai.com
+
+Accessed [23 May 2025]
+ */
